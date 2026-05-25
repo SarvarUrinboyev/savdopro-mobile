@@ -24,7 +24,14 @@ import type { FieldErrors, LoginResponse } from '../types/auth';
 const DEFAULT_URL = 'https://167-172-164-214.nip.io';
 
 export function getLicenseUrl(): string {
-  return storage.getString(STORAGE_KEYS.LICENSE_URL) || DEFAULT_URL;
+  const stored = storage.getString(STORAGE_KEYS.LICENSE_URL);
+  // Migrate: wipe any plain-HTTP URL saved by an old build and fall back to
+  // the HTTPS default so Android's network-security-policy never blocks us.
+  if (stored && stored.startsWith('http://')) {
+    storage.remove(STORAGE_KEYS.LICENSE_URL);
+    return DEFAULT_URL;
+  }
+  return stored || DEFAULT_URL;
 }
 
 export function setLicenseUrl(url: string | null): void {

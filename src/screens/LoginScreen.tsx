@@ -1,7 +1,7 @@
-// Login screen — username + password only.
-// Server URL is hidden (hardcoded via DEFAULT_URL in licenseClient.ts).
-// Last-used credentials are saved to MMKV so the user never has to
-// re-type them after the first login.
+// Login screen — server URL + username + password + optional TOTP.
+// Server URL is persisted in MMKV so the user sets it once;
+// it defaults to the HTTPS nip.io endpoint baked into licenseClient.ts.
+// Last-used credentials are also saved to MMKV.
 
 import { useState } from 'react';
 import {
@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../auth/AuthContext';
-import { LicenseError } from '../api/licenseClient';
+import { LicenseError, getLicenseUrl, setLicenseUrl } from '../api/licenseClient';
 import { storage, STORAGE_KEYS } from '../storage/mmkv';
 import { useColors } from '../theme/brand';
 
@@ -24,6 +24,8 @@ export default function LoginScreen() {
   const { login } = useAuth();
   const colors = useColors();
 
+  // Server URL — read live from licenseClient (which auto-migrates HTTP→HTTPS)
+  const [serverUrl, setServerUrl] = useState(() => getLicenseUrl());
   const [username, setUsername] = useState(
     () => storage.getString(STORAGE_KEYS.SAVED_USERNAME) ?? '',
   );
@@ -40,6 +42,10 @@ export default function LoginScreen() {
       setError('Login va parolni kiriting');
       return;
     }
+    // Persist URL before attempting login so licenseClient uses it immediately.
+    const trimmedUrl = serverUrl.trim().replace(/\/+$/, '');
+    setLicenseUrl(trimmedUrl || null);
+
     setError(null);
     setSubmitting(true);
     try {
@@ -73,6 +79,17 @@ export default function LoginScreen() {
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Akkauntingizga kiring
           </Text>
+
+          <Field
+            label="Server URL"
+            value={serverUrl}
+            onChange={setServerUrl}
+            autoCapitalize="none"
+            keyboardType="url"
+            autoCorrect={false}
+            placeholder="https://167-172-164-214.nip.io"
+            colors={colors}
+          />
 
           <Field
             label="Login"
@@ -126,9 +143,11 @@ interface FieldProps {
   value: string;
   onChange: (v: string) => void;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-  keyboardType?: 'default' | 'number-pad' | 'email-address';
+  keyboardType?: 'default' | 'number-pad' | 'email-address' | 'url';
   secureTextEntry?: boolean;
   maxLength?: number;
+  placeholder?: string;
+  autoCorrect?: boolean;
   colors: ReturnType<typeof useColors>;
 }
 
@@ -140,6 +159,8 @@ function Field({
   keyboardType = 'default',
   secureTextEntry,
   maxLength,
+  placeholder,
+  autoCorrect = false,
   colors,
 }: FieldProps) {
   return (
@@ -156,7 +177,9 @@ function Field({
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
         maxLength={maxLength}
-        autoCorrect={false}
+        placeholder={placeholder}
+        placeholderTextColor={colors.textMuted}
+        autoCorrect={autoCorrect}
       />
     </View>
   );

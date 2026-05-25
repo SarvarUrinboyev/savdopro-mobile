@@ -15,7 +15,13 @@ import { getAccessToken, setLicenseUnauthorizedHandler } from './licenseClient';
 const DEFAULT_BACKEND_URL = 'https://167-172-164-214.nip.io';
 
 export function getBackendUrl(): string {
-  return storage.getString(STORAGE_KEYS.BACKEND_URL) || DEFAULT_BACKEND_URL;
+  const stored = storage.getString(STORAGE_KEYS.BACKEND_URL);
+  // Migrate: wipe any plain-HTTP URL saved by an old build.
+  if (stored && stored.startsWith('http://')) {
+    storage.remove(STORAGE_KEYS.BACKEND_URL);
+    return DEFAULT_BACKEND_URL;
+  }
+  return stored || DEFAULT_BACKEND_URL;
 }
 
 export function setBackendUrl(url: string | null): void {
