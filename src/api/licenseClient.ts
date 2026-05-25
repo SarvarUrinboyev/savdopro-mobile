@@ -118,6 +118,10 @@ async function refreshOnce(): Promise<string | null> {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+// 10-second hard timeout on every request — prevents the login button
+// from freezing indefinitely when the server is unreachable.
+const FETCH_TIMEOUT_MS = 10_000;
+
 async function rawFetch(method: Method, path: string, body?: unknown): Promise<Response> {
   const base = getLicenseUrl().replace(/\/+$/, '');
   const headers: Record<string, string> = {};
@@ -128,7 +132,19 @@ async function rawFetch(method: Method, path: string, body?: unknown): Promise<R
   }
   const token = getAccessToken();
   if (token) headers.Authorization = `Bearer ${token}`;
-  return fetch(`${base}${path}`, { method, headers, body: payload });
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(`${base}${path}`, {
+      method,
+      headers,
+      body: payload,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export class LicenseError extends Error {
