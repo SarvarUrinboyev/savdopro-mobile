@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "SavdoPRO",
+    "slug": "savdopro-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "savdopro",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "uz.barakat.savdopro",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak.",
+        "NSBluetoothAlwaysUsageDescription": "Bluetooth chek printeriga ulanish uchun ruxsat kerak."
+      }
+    },
+    "android": {
+      "package": "uz.barakat.savdopro",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.INTERNET"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "react-native-mmkv"
+    ]
+  }
+}
