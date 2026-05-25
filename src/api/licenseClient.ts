@@ -21,7 +21,7 @@ import type { FieldErrors, LoginResponse } from '../types/auth';
 
 // Dev default — laptop's LAN IP on Sarvar's Wi-Fi. Phone + laptop must
 // share the network. Change via the Login screen's "Server URL" field.
-const DEFAULT_URL = 'http://192.168.100.6:9090';
+const DEFAULT_URL = 'https://167-172-164-214.nip.io';
 
 export function getLicenseUrl(): string {
   return storage.getString(STORAGE_KEYS.LICENSE_URL) || DEFAULT_URL;
@@ -170,9 +170,10 @@ async function request<T = unknown>(method: Method, path: string, body?: unknown
   let response: Response;
   try {
     response = await rawFetch(method, path, body);
-  } catch {
+  } catch (e) {
+    const detail = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     throw new LicenseError(
-      "License Server'ga ulanib bo'lmadi. Internet va server URL'ini tekshiring.",
+      `Ulanib bo'lmadi [${getLicenseUrl()}] — ${detail}`,
       0,
     );
   }
