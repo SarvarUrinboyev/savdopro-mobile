@@ -37,7 +37,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [],
+    "plugins": [
+      "./plugins/withAndroidCleartextTraffic"
+    ],
     "extra": {
       "eas": {
         "projectId": "d5d05573-3f7d-4d07-8439-c06bddd8bf38"

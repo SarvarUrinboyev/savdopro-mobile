@@ -1,19 +1,15 @@
-// Top-level navigator. Three states:
-//   1. Loading session  → splash spinner
-//   2. No user          → LoginScreen
-//   3. Authenticated    → role-based tab set (owner vs cashier)
-//
-// Splitting by role here means the wrong tab set physically can't
-// render — a SHOP_USER never sees the OWNER routes, so we don't have
-// to repeat role checks inside individual screens.
+// Top-level navigator.
+//   No user   → LoginScreen
+//   SHOP_USER → CashierStack (bottom tabs + shift sub-screens)
+//   Owner     → OwnerStack   (bottom tabs + all feature screens)
 
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../auth/AuthContext';
 import { useColors } from '../theme/brand';
 import LoginScreen from '../screens/LoginScreen';
-import OwnerTabs from './OwnerTabs';
-import CashierTabs from './CashierTabs';
+import OwnerStack from './OwnerStack';
+import CashierStack from './CashierStack';
 
 export default function RootNavigator() {
   const { user, loading } = useAuth();
@@ -32,19 +28,14 @@ export default function RootNavigator() {
       {!user ? (
         <LoginScreen />
       ) : user.role === 'SHOP_USER' ? (
-        <CashierTabs />
+        <CashierStack />
       ) : (
-        // ACCOUNT_OWNER + SUPER_ADMIN both land on the owner tabs.
-        <OwnerTabs />
+        <OwnerStack />
       )}
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  splash: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

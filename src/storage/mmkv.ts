@@ -15,4 +15,8 @@ export const STORAGE_KEYS = {
   LICENSE_URL: 'savdopro.licenseUrl',
   ACCESS_TOKEN: 'savdopro.accessToken',
   REFRESH_TOKEN: 'savdopro.refreshToken',
+  SAVED_USERNAME: 'savdopro.savedUsername',
+  SAVED_PASSWORD: 'savdopro.savedPassword',
+  BACKEND_URL: 'savdopro.backendUrl',
+  ACTIVE_SHOP_ID: 'savdopro.activeShopId',
 } as const;

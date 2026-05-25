@@ -1,13 +1,11 @@
-// Login screen — three fields (server URL, username, password) plus
-// an optional TOTP code that's only shown after the server rejects
-// the first attempt with a "TOTP required" hint. The URL field
-// defaults to whatever's stored in MMKV (or the LAN-IP fallback) so
-// most users never see it after first launch.
+// Login screen — username + password only.
+// Server URL is hidden (hardcoded via DEFAULT_URL in licenseClient.ts).
+// Last-used credentials are saved to MMKV so the user never has to
+// re-type them after the first login.
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,26 +16,24 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../auth/AuthContext';
-import { getLicenseUrl, setLicenseUrl, LicenseError } from '../api/licenseClient';
+import { LicenseError } from '../api/licenseClient';
+import { storage, STORAGE_KEYS } from '../storage/mmkv';
 import { useColors } from '../theme/brand';
 
 export default function LoginScreen() {
   const { login } = useAuth();
   const colors = useColors();
 
-  const [serverUrl, setServerUrl] = useState(getLicenseUrl());
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(
+    () => storage.getString(STORAGE_KEYS.SAVED_USERNAME) ?? '',
+  );
+  const [password, setPassword] = useState(
+    () => storage.getString(STORAGE_KEYS.SAVED_PASSWORD) ?? '',
+  );
   const [totpCode, setTotpCode] = useState('');
   const [needsTotp, setNeedsTotp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Persist URL on every change so a relaunch picks it up — saves the
-  // user re-typing the LAN address each time the dev server moves.
-  useEffect(() => {
-    if (serverUrl.trim()) setLicenseUrl(serverUrl.trim());
-  }, [serverUrl]);
 
   const onSubmit = async () => {
     if (!username.trim() || !password) {
@@ -48,12 +44,12 @@ export default function LoginScreen() {
     setSubmitting(true);
     try {
       await login(username.trim(), password, totpCode.trim() || undefined);
-      // AuthProvider flips user → RootNavigator swaps to tabs.
+
+      // Save credentials only after a successful login.
+      storage.set(STORAGE_KEYS.SAVED_USERNAME, username.trim());
+      storage.set(STORAGE_KEYS.SAVED_PASSWORD, password);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Kirish muvaffaqiyatsiz';
-      // The server signals "TOTP required" via the LoginRequest validation
-      // path — if the message hints at TOTP, reveal the second field
-      // instead of confusing the user with a generic error.
       if (err instanceof LicenseError && /totp|2fa|kod/i.test(msg)) {
         setNeedsTotp(true);
       }
@@ -61,14 +57,6 @@ export default function LoginScreen() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const onPickServer = () => {
-    Alert.alert(
-      'Server manzili',
-      "Telefon va kompyuter bir Wi-Fi tarmoqda bo'lishi shart. " +
-        'Standart: http://192.168.100.6:9090',
-    );
   };
 
   return (
@@ -82,17 +70,10 @@ export default function LoginScreen() {
       >
         <View style={styles.card}>
           <Text style={[styles.title, { color: colors.text }]}>SavdoPRO</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Akkauntingizga kiring</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+            Akkauntingizga kiring
+          </Text>
 
-          <Field
-            label="Server URL"
-            value={serverUrl}
-            onChange={setServerUrl}
-            autoCapitalize="none"
-            keyboardType="url"
-            onLabelPress={onPickServer}
-            colors={colors}
-          />
           <Field
             label="Login"
             value={username}
@@ -145,10 +126,9 @@ interface FieldProps {
   value: string;
   onChange: (v: string) => void;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-  keyboardType?: 'default' | 'url' | 'number-pad' | 'email-address';
+  keyboardType?: 'default' | 'number-pad' | 'email-address';
   secureTextEntry?: boolean;
   maxLength?: number;
-  onLabelPress?: () => void;
   colors: ReturnType<typeof useColors>;
 }
 
@@ -160,18 +140,11 @@ function Field({
   keyboardType = 'default',
   secureTextEntry,
   maxLength,
-  onLabelPress,
   colors,
 }: FieldProps) {
   return (
     <View style={styles.field}>
-      <Text
-        style={[styles.label, { color: colors.textMuted }]}
-        onPress={onLabelPress}
-      >
-        {label}
-        {onLabelPress ? '  ⓘ' : ''}
-      </Text>
+      <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
       <TextInput
         style={[
           styles.input,
