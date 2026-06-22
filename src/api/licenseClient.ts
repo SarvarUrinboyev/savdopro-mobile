@@ -125,9 +125,11 @@ async function refreshOnce(): Promise<string | null> {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-// 10-second hard timeout on every request — prevents the login button
-// from freezing indefinitely when the server is unreachable.
-const FETCH_TIMEOUT_MS = 10_000;
+// Hard timeout per request.
+// 20 s covers the worst-case Uzbekistan→Frankfurt first-connection latency
+// (DNS + TCP + TLS handshake + Spring Boot processing). 10 s was too tight
+// on mobile 4G; users saw "Fetch request has been canceled" on first login.
+const FETCH_TIMEOUT_MS = 20_000;
 
 async function rawFetch(method: Method, path: string, body?: unknown): Promise<Response> {
   const base = getLicenseUrl().replace(/\/+$/, '');
@@ -141,7 +143,12 @@ async function rawFetch(method: Method, path: string, body?: unknown): Promise<R
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  // Tag the abort so callers can show a timeout-specific message.
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
   try {
     return await fetch(`${base}${path}`, {
       method,
@@ -149,6 +156,15 @@ async function rawFetch(method: Method, path: string, body?: unknown): Promise<R
       body: payload,
       signal: controller.signal,
     });
+  } catch (err) {
+    // Re-throw with a cleaner message when we deliberately aborted.
+    if (timedOut) {
+      throw new Error(
+        `Server ${FETCH_TIMEOUT_MS / 1000} soniyada javob bermadi. ` +
+        'Internet aloqasini yoki server URL ini tekshiring.',
+      );
+    }
+    throw err;
   } finally {
     clearTimeout(timer);
   }

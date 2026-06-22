@@ -32,8 +32,10 @@ export function setBackendUrl(url: string | null): void {
   }
 }
 
-// 15-second timeout — backend may be slower than auth endpoints.
-const FETCH_TIMEOUT_MS = 15_000;
+// 25-second timeout — backend may be slower than auth endpoints.
+// VPS cold-start (JVM + Hibernate + H2) can take 15–20 s on first request;
+// warm requests are <1 s. 25 s covers the worst-case first-hit scenario.
+const FETCH_TIMEOUT_MS = 25_000;
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -49,7 +51,11 @@ async function rawFetch(method: Method, path: string, body?: unknown): Promise<R
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
   try {
     return await fetch(`${base}/api${path}`, {
       method,
@@ -57,6 +63,14 @@ async function rawFetch(method: Method, path: string, body?: unknown): Promise<R
       body: payload,
       signal: controller.signal,
     });
+  } catch (err) {
+    if (timedOut) {
+      throw new Error(
+        `Backend ${FETCH_TIMEOUT_MS / 1000} soniyada javob bermadi. ` +
+        'Server ishlayotganini tekshiring.',
+      );
+    }
+    throw err;
   } finally {
     clearTimeout(timer);
   }

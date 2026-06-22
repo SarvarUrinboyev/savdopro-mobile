@@ -123,7 +123,7 @@ export default function ScanScreen() {
       <View
         style={[
           styles.searchBar,
-          { backgroundColor: colors.surface, borderColor: colors.border },
+          { backgroundColor: colors.surface, borderColor: colors.border, flex: 1, margin: 0 },
         ]}
       >
         <Ionicons
@@ -150,6 +150,21 @@ export default function ScanScreen() {
             <Ionicons name="close-circle" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         ) : null}
+      </View>
+      {/* Camera scanner button — opens CameraScanScreen modal */}
+      <View style={{ position: 'absolute', top: 12, right: 12 }}>
+        <TouchableOpacity
+          style={{
+            width: 50, height: 50, borderRadius: 12,
+            backgroundColor: colors.primary,
+            alignItems: 'center', justifyContent: 'center',
+            elevation: 3,
+          }}
+          onPress={() => navigation.navigate('CameraScan', { mode: 'cart' })}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="camera" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       {/* Product list */}

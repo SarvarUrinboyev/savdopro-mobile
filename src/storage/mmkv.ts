@@ -19,4 +19,5 @@ export const STORAGE_KEYS = {
   SAVED_PASSWORD: 'savdopro.savedPassword',
   BACKEND_URL: 'savdopro.backendUrl',
   ACTIVE_SHOP_ID: 'savdopro.activeShopId',
+  PRINTER_ADDRESS: 'savdopro.printerAddress',
 } as const;

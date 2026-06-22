@@ -26,6 +26,9 @@ import AdminScreen        from '../screens/owner/AdminScreen';
 import SettingsScreen     from '../screens/SettingsScreen';
 import ProductEditorScreen from '../screens/owner/ProductEditorScreen';
 import WarehouseMovementsScreen from '../screens/owner/WarehouseMovementsScreen';
+import StockTakeScreen from '../screens/owner/StockTakeScreen';
+import PrinterSettingsScreen from '../screens/owner/PrinterSettingsScreen';
+import CameraScanScreen from '../screens/cashier/CameraScanScreen';
 
 export type OwnerStackParamList = {
   Tabs:               undefined;
@@ -46,6 +49,10 @@ export type OwnerStackParamList = {
   Calculator:         undefined;
   Admin:              undefined;
   Settings:           undefined;
+  StockTake:          { product?: any } | undefined;
+  PrinterSettings:    undefined;
+  CameraScan:         { mode?: 'cart' | 'lookup' | 'stock-take' } | undefined;
+  StockTakeEntry:     { product: any };
 };
 
 const Stack = createNativeStackNavigator<OwnerStackParamList>();
@@ -80,6 +87,14 @@ export default function OwnerStack() {
       <Stack.Screen name="Calculator"         component={CalculatorScreen}        options={{ title: 'Kalkulyator' }} />
       <Stack.Screen name="Admin"              component={AdminScreen}             options={{ title: 'Admin panel' }} />
       <Stack.Screen name="Settings"           component={SettingsScreen}          options={{ title: 'Sozlamalar' }} />
+      <Stack.Screen name="StockTake"          component={StockTakeScreen}         options={{ title: 'Inventarizatsiya' }} />
+      <Stack.Screen name="StockTakeEntry"     component={StockTakeScreen}         options={{ title: 'Inventarizatsiya' }} />
+      <Stack.Screen name="PrinterSettings"    component={PrinterSettingsScreen}   options={{ title: 'Bluetooth printer' }} />
+      <Stack.Screen
+        name="CameraScan"
+        component={CameraScanScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
     </Stack.Navigator>
   );
 }

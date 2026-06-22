@@ -5,9 +5,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColors } from '../theme/brand';
 import { CartProvider } from '../context/CartContext';
 import CashierTabs from './CashierTabs';
+import CameraScanScreen from '../screens/cashier/CameraScanScreen';
 
 export type CashierStackParamList = {
   Tabs: undefined;
+  CameraScan: { mode?: 'cart' | 'lookup' | 'stock-take' } | undefined;
 };
 
 const Stack = createNativeStackNavigator<CashierStackParamList>();
@@ -23,6 +25,11 @@ export default function CashierStack() {
         }}
       >
         <Stack.Screen name="Tabs" component={CashierTabs} />
+        <Stack.Screen
+          name="CameraScan"
+          component={CameraScanScreen}
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
       </Stack.Navigator>
     </CartProvider>
   );

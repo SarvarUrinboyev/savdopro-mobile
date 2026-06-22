@@ -2,7 +2,7 @@
   "expo": {
     "name": "SavdoPRO",
     "slug": "savdopro-mobile",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,12 +12,13 @@
       "bundleIdentifier": "uz.barakat.savdopro",
       "infoPlist": {
         "NSCameraUsageDescription": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak.",
-        "NSBluetoothAlwaysUsageDescription": "Bluetooth chek printeriga ulanish uchun ruxsat kerak."
+        "NSBluetoothAlwaysUsageDescription": "Bluetooth chek printeriga ulanish uchun ruxsat kerak.",
+        "NSBluetoothPeripheralUsageDescription": "Bluetooth chek printeriga ulanish uchun ruxsat kerak."
       }
     },
     "android": {
       "package": "uz.barakat.savdopro",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -30,7 +31,9 @@
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
-        "android.permission.INTERNET"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE"
       ],
       "predictiveBackGestureEnabled": false,
       "usesCleartextTraffic": true
@@ -39,7 +42,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "./plugins/withAndroidCleartextTraffic"
+      "./plugins/withAndroidCleartextTraffic",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mahsulot shtrix-kodini skanerlash uchun kamera kerak."
+        }
+      ]
     ],
     "extra": {
       "eas": {
