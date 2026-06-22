@@ -1,5 +1,7 @@
 # SavdoPRO Mobile
 
+[![Mobile quality](https://github.com/SarvarUrinboyev/savdopro-mobile/actions/workflows/quality.yml/badge.svg)](https://github.com/SarvarUrinboyev/savdopro-mobile/actions/workflows/quality.yml)
+
 iOS + Android companion app for the **SavdoPRO** desktop POS (`barakat-supermarket`).
 Built with **Expo SDK 56 + React Native 0.85 + TypeScript**.
 

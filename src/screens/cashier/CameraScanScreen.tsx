@@ -155,7 +155,11 @@ const styles = StyleSheet.create({
   btn: { paddingHorizontal: 22, paddingVertical: 12, borderRadius: 10 },
   btnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
