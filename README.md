@@ -64,7 +64,7 @@ npx expo run:android
 
 ### Backend connectivity
 
-The License Server URL defaults to `http://192.168.100.6:9090` (laptop's LAN
+The License Server URL defaults to `http://<your-lan-ip>:9090` (development machine's LAN
 IP). The phone and the laptop **must be on the same Wi-Fi**. To change it, edit
 the field on the Login screen — the value persists in MMKV.
 
